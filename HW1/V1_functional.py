@@ -13,7 +13,7 @@ uart_server = UARTService()
 advertisement = ProvideServicesAdvertisement(uart_server)
 
 # Setup for motor vibration
-motor = digitalio.DigitalInOut(board.A4)  # Adjust to your motor's pin
+motor = digitalio.DigitalInOut(board.A4)  
 motor.switch_to_output()
 
 def vibrate_motor(times, on_time=0.2, off_time=0.2):
@@ -31,14 +31,15 @@ def ensure_ble_connection():
     if not ble.connected:
         print("Trying to connect...")
         ble.start_advertising(advertisement)
-        while not ble.connected:
-            pass  # Wait for a connection
+        # Wait for a connection
         ble.stop_advertising()
+        while not ble.connected:
+            pass  
         print("Connected!")
-
+        
+# Ensure BLE connection first
 while True:
-    ensure_ble_connection()  # Ensure BLE connection first
-
+    ensure_ble_connection()  
     if mode == "start":
         # Blinking white LED
         cp.pixels.fill((255, 255, 255))
@@ -48,11 +49,11 @@ while True:
 
         if cp.button_a:
             mode = "ambient_light"
-            while cp.button_a: pass  # Debounce
+            while cp.button_a: pass  
         elif cp.button_b:
             mode = "sleep_mode"
-            while cp.button_b: pass  # Debounce
-
+            while cp.button_b: pass  
+            
     elif mode == "ambient_light":
         light_value = cp.light
         if light_value < 50:
@@ -65,7 +66,7 @@ while True:
 
         if cp.button_a and cp.button_b:
             mode = "start"
-            while cp.button_a and cp.button_b: pass  # Debounce
+            while cp.button_a and cp.button_b: pass  
 
     elif mode == "sleep_mode":
         # Initialize variables at the start of sleep mode
@@ -84,19 +85,21 @@ while True:
             # Check temperature range
             if not 19 <= temp <= 30:
                 vibrate_motor(1)
-                cp.pixels[0] = (0, 0, 255)  # Set a single pixel to blue
+                cp.pixels[0] = (0, 0, 255)  # Blue
                 time.sleep(1)
 
             # Check light condition
             if light_value > 10:
-                cp.pixels.fill((255, 0, 0))  # Red light
+                cp.pixels.fill((255, 0, 0))  # Red 
 
-            # For the Mu plotter, print the values in a comma-separated format
+            # Print the values in a comma-separated format
             print(time.monotonic(), x, y, z, temp, light_value, turn_count)
 
             # Update last accelerometer values for the next iteration
             last_x, last_y, last_z = x, y, z
-            cp.pixels.fill((0, 0, 0))  # Turn off LEDs for next loop iteration
+            
+            # Turn off LEDs for next loop iteration
+            cp.pixels.fill((0, 0, 0))  
 
             # Optional: Transmit data over BLE
             if ble.connected:
@@ -108,5 +111,5 @@ while True:
 
             if cp.button_a and cp.button_b:
                 mode = "start"
-                while cp.button_a and cp.button_b: pass  # Debounce
-            time.sleep(0.1)  # Adjust sleep time as needed for responsiveness vs. power consumption
+                while cp.button_a and cp.button_b: pass 
+            time.sleep(0.1)  
